@@ -1,15 +1,20 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { ConnectButton } from "thirdweb/react";
 import { toast } from 'react-toastify';
-import { createThirdwebClient, getContract, readContract } from "thirdweb";
+import { createThirdwebClient, getContract, prepareContractCall } from "thirdweb";
 import { defineChain } from "thirdweb/chains";
 import { client } from "@/app/client";
-import { useReadContract } from "thirdweb/react";
+import { useReadContract, useSendTransaction, TransactionButton } from "thirdweb/react";
 
 export default function Home() {
   const [number, setNumber] = useState(0);
   const [error, setError] = useState('');
+  const [isLoadingDecrement, setIsLoadingDecrement] = useState(false);
+  const [isLoadingIncrement, setIsLoadingIncrement] = useState(false);
+
+  const { mutate: sendTransaction } = useSendTransaction();
 
   const contract = getContract({
     client,
@@ -40,22 +45,6 @@ export default function Home() {
     }
   };
 
-  const triggerIncrement = () => {
-    if (number >= 10) {
-      setError(`NumberTooHigh: Current number is ${number}`);
-      return;
-    }
-    setNumber(prev => prev + 1);
-  };
-
-  const triggerDecrement = () => {
-    if (number <= 0) {
-      setError(`NumberTooLow: Current number is ${number}`);
-      return;
-    }
-    setNumber(prev => prev - 1);
-  };
-
   const triggerSetNumber = () => {
     // ...
   };
@@ -63,6 +52,15 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
       <div className="container mx-auto px-4 py-16 max-w-2xl">
+        <div className="mx-auto py-5 text-center">
+          <ConnectButton
+            client={client}
+            appMetadata={{
+              name: "Counter DApp",
+              url: "https://pelitabangsa.co.id",
+            }}
+          />
+        </div>
         <div className="bg-zinc-900 rounded-xl p-8 shadow-lg">
           <h1 className="text-4xl font-bold mb-8 text-center">Counter DApp</h1>
           
@@ -74,28 +72,72 @@ export default function Home() {
 
           {/* Control Buttons */}
           <div className="grid grid-cols-3 gap-4 mb-5">
-            <button
-              onClick={() => triggerDecrement()}
-              className="bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 px-6 rounded-lg transition-colors"
+            <TransactionButton
+              className="hover:bg-zinc-400 text-white font-bold py-4 px-6 rounded-lg transition-colors"
+              transaction={async () => {
+                setIsLoadingDecrement(true);
+
+                const tx = prepareContractCall({
+                  contract,
+                  method: "function decrement()",
+                  params: [],
+                });
+                return tx;
+              }}
+              onTransactionSent={(result) => {
+                toast.info("Decrementing Number...");
+                setIsLoadingDecrement(false);
+              }}
+              onTransactionConfirmed={(receipt) => {
+                // console.log("Transaction confirmed", receipt.transactionHash);
+                toast.success("Number decremented!");
+              }}
+              onError={(error) => {
+                // console.error("Transaction error", error);
+                toast.error(error.message);
+                setIsLoadingDecrement(false);
+              }}
             >
               Decrement
-            </button>
+            </TransactionButton>
             
             <div className="relative">
               <input
                 type="number"
                 onChange={(e) => handleSetNumber(e.target.value)}
                 placeholder="Set number"
-                className="w-full bg-zinc-800 text-white px-4 py-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-zinc-200 text-white px-4 py-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             
-            <button
-              onClick={() => triggerIncrement()}
-              className="bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 px-6 rounded-lg transition-colors"
+            <TransactionButton
+              className="hover:bg-zinc-400 text-white font-bold py-4 px-6 rounded-lg transition-colors"
+              transaction={async () => {
+                setIsLoadingIncrement(true);
+
+                const tx = prepareContractCall({
+                  contract,
+                  method: "function increment()",
+                  params: [],
+                });
+                return tx;
+              }}
+              onTransactionSent={(result) => {
+                toast.info("Incrementing Number...");
+                setIsLoadingIncrement(false);
+              }}
+              onTransactionConfirmed={(receipt) => {
+                // console.log("Transaction confirmed", receipt.transactionHash);
+                toast.success("Number incremented!");
+              }}
+              onError={(error) => {
+                // console.error("Transaction error", error);
+                toast.error(error.message);
+                setIsLoadingIncrement(false);
+              }}
             >
               Increment
-            </button>
+            </TransactionButton>
           </div>
 
           <div className="grid gap-4 mb-8">
