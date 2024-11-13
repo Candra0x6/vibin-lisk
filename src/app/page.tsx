@@ -2,10 +2,32 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import { createThirdwebClient, getContract, readContract } from "thirdweb";
+import { defineChain } from "thirdweb/chains";
+import { client } from "@/app/client";
+import { useReadContract } from "thirdweb/react";
 
 export default function Home() {
   const [number, setNumber] = useState(0);
   const [error, setError] = useState('');
+
+  const contract = getContract({
+    client,
+    chain: defineChain(4202),
+    address: "0xa36d09e39Ef9b1D0685e3caECcD20f6379a1a9E5",
+  });
+  
+  const { data: dataNumber, isPending: isPendingNumber } = useReadContract({
+    contract,
+    method: "function number() view returns (uint256)",
+    params: [],
+  });
+
+  useEffect(() => {
+    if (dataNumber) {
+      setNumber(parseInt(dataNumber.toString()));
+    }
+  }, [dataNumber]);
 
   // Simulating contract functions
   const handleSetNumber = (newNumber: string) => {
