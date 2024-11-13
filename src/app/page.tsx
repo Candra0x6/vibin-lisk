@@ -10,9 +10,8 @@ import { useReadContract, useSendTransaction, TransactionButton } from "thirdweb
 
 export default function Home() {
   const [number, setNumber] = useState(0);
+  const [tempNumber, setTempNumber] = useState(0);
   const [error, setError] = useState('');
-  const [isLoadingDecrement, setIsLoadingDecrement] = useState(false);
-  const [isLoadingIncrement, setIsLoadingIncrement] = useState(false);
 
   const { mutate: sendTransaction } = useSendTransaction();
 
@@ -35,10 +34,10 @@ export default function Home() {
   }, [dataNumber]);
 
   // Simulating contract functions
-  const handleSetNumber = (newNumber: string) => {
+  const handleSetTempNumber = (newNumber: string) => {
     try {
       const num = parseInt(newNumber);
-      setNumber(num);
+      setTempNumber(num);
       setError('');
     } catch (err) {
       toast.error("Invalid number input!");
@@ -75,7 +74,6 @@ export default function Home() {
             <TransactionButton
               className="hover:bg-zinc-400 text-white font-bold py-4 px-6 rounded-lg transition-colors"
               transaction={async () => {
-                setIsLoadingDecrement(true);
 
                 const tx = prepareContractCall({
                   contract,
@@ -86,7 +84,6 @@ export default function Home() {
               }}
               onTransactionSent={(result) => {
                 toast.info("Decrementing Number...");
-                setIsLoadingDecrement(false);
               }}
               onTransactionConfirmed={(receipt) => {
                 // console.log("Transaction confirmed", receipt.transactionHash);
@@ -95,7 +92,6 @@ export default function Home() {
               onError={(error) => {
                 // console.error("Transaction error", error);
                 toast.error(error.message);
-                setIsLoadingDecrement(false);
               }}
             >
               Decrement
@@ -104,16 +100,15 @@ export default function Home() {
             <div className="relative">
               <input
                 type="number"
-                onChange={(e) => handleSetNumber(e.target.value)}
+                onChange={(e) => handleSetTempNumber(e.target.value)}
                 placeholder="Set number"
-                className="w-full bg-zinc-200 text-white px-4 py-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-zinc-200 text-black px-4 py-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             
             <TransactionButton
               className="hover:bg-zinc-400 text-white font-bold py-4 px-6 rounded-lg transition-colors"
               transaction={async () => {
-                setIsLoadingIncrement(true);
 
                 const tx = prepareContractCall({
                   contract,
@@ -124,7 +119,6 @@ export default function Home() {
               }}
               onTransactionSent={(result) => {
                 toast.info("Incrementing Number...");
-                setIsLoadingIncrement(false);
               }}
               onTransactionConfirmed={(receipt) => {
                 // console.log("Transaction confirmed", receipt.transactionHash);
@@ -133,7 +127,6 @@ export default function Home() {
               onError={(error) => {
                 // console.error("Transaction error", error);
                 toast.error(error.message);
-                setIsLoadingIncrement(false);
               }}
             >
               Increment
@@ -141,13 +134,31 @@ export default function Home() {
           </div>
 
           <div className="grid gap-4 mb-8">
-            
-            <button
-              onClick={() => triggerSetNumber()}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg transition-colors"
+          <TransactionButton
+              className="bg-blue-200 hover:bg-blue-200 text-white font-bold py-4 px-6"
+              transaction={async () => {
+
+                const tx = prepareContractCall({
+                  contract,
+                  method: "function setNumber(uint256 newNumber)",
+                  params: [BigInt(tempNumber)],
+                });
+                return tx;
+              }}
+              onTransactionSent={(result) => {
+                toast.info("Setting Number...");
+              }}
+              onTransactionConfirmed={(receipt) => {
+                // console.log("Transaction confirmed", receipt.transactionHash);
+                toast.success("Number Set!");
+              }}
+              onError={(error) => {
+                // console.error("Transaction error", error);
+                toast.error(error.message);
+              }}
             >
               Set Number
-            </button>
+            </TransactionButton>
           </div>
         </div>
       </div>
