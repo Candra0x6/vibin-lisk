@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react';
 import { ConnectButton } from "thirdweb/react";
 import { toast } from 'react-toastify';
-import { createThirdwebClient, getContract, prepareContractCall } from "thirdweb";
+import { createThirdwebClient, getContract, prepareContractCall, prepareEvent } from "thirdweb";
 import { defineChain } from "thirdweb/chains";
 import { client } from "@/app/client";
-import { useReadContract, useSendTransaction, TransactionButton } from "thirdweb/react";
+import { useReadContract, useSendTransaction, TransactionButton, useContractEvents } from "thirdweb/react";
 
 export default function Home() {
   const [number, setNumber] = useState(0);
@@ -23,6 +23,20 @@ export default function Home() {
     method: "function number() view returns (uint256)",
     params: [],
   });
+
+  const preparedEvent = prepareEvent({
+    signature: "event NumberSet(uint256 number)",
+  });
+
+  const { data: event } = useContractEvents({
+    contract,
+    events: [preparedEvent],
+    watch: true,
+  });
+
+  useEffect(() => {
+    console.log(event);
+  }, [event]);
 
   useEffect(() => {
     if (dataNumber) {
