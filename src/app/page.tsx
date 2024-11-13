@@ -10,10 +10,7 @@ import { useReadContract, useSendTransaction, TransactionButton } from "thirdweb
 
 export default function Home() {
   const [number, setNumber] = useState(0);
-  const [tempNumber, setTempNumber] = useState(0);
-  const [error, setError] = useState('');
-
-  const { mutate: sendTransaction } = useSendTransaction();
+  const [tempNumber, setTempNumber] = useState("");
 
   const contract = getContract({
     client,
@@ -36,16 +33,10 @@ export default function Home() {
   // Simulating contract functions
   const handleSetTempNumber = (newNumber: string) => {
     try {
-      const num = parseInt(newNumber);
-      setTempNumber(num);
-      setError('');
+      setTempNumber(newNumber);
     } catch (err) {
       toast.error("Invalid number input!");
     }
-  };
-
-  const triggerSetNumber = () => {
-    // ...
   };
 
   return (
@@ -147,6 +138,7 @@ export default function Home() {
               }}
               onTransactionSent={(result) => {
                 toast.info("Setting Number...");
+                setTempNumber("");
               }}
               onTransactionConfirmed={(receipt) => {
                 // console.log("Transaction confirmed", receipt.transactionHash);
