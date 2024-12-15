@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 ![tw-banner](https://github.com/thirdweb-example/next-starter/assets/57885104/20c8ce3b-4e55-4f10-ae03-2fe4743a5ee8)
 
@@ -57,3 +58,6 @@ yarn start
 ## Need help?
 
 For help or feedback, please [visit our support site](https://thirdweb.com/support)
+=======
+# vibin-lisk
+>>>>>>> 5cd411e499146def054366233c5f2ca5e232b0db
